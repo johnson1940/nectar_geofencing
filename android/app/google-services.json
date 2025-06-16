@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "687682159571",
+    "project_id": "geo-fencing-b086b",
+    "storage_bucket": "geo-fencing-b086b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:687682159571:android:8b919cbdf2d492cc556526",
+        "android_client_info": {
+          "package_name": "com.example.nectar_geofencing"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB20w3HHMRE_xH5S3ImGCbiq33z7BSLOHY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
