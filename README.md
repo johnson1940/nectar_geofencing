@@ -58,35 +58,35 @@ The **Geofence Tracker App** is a powerful and user-friendly mobile application 
 
 ### Platform Setup Instructions
 
-## Android setup 
+### Android setup 
 
-# Permissions:
-Add the following permissions to your android/app/src/main/AndroidManifest.xml file:
+#### Permissions:
+- Add the following permissions to your android/app/src/main/AndroidManifest.xml file:
 
-<!-- Location Permissions -->
-<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-<uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
+- <!-- Location Permissions -->
+- <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+- <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+- <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
 
-<!-- Foreground Service -->
-<uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+- <!-- Foreground Service -->
+- <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
-<!-- Notification Permission (for Android 13+) -->
-<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+- <!-- Notification Permission (for Android 13+) -->
+- <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
 # Background Service Configuration:
-Inside the <application> tag in AndroidManifest.xml, add:
+- Inside the <application> tag in AndroidManifest.xml, add:
 
-<service
-android:name="id.flutter.flutter_background_service.BackgroundService"
-android:foregroundServiceType="location"
-android:exported="false"
-tools:replace="android:exported,android:foregroundServiceType" />
+- <service
+- android:name="id.flutter.flutter_background_service.BackgroundService"
+- android:foregroundServiceType="location"
+- android:exported="false"
+- tools:replace="android:exported,android:foregroundServiceType" />
 
 # Add Google Maps API Key:
-<meta-data
-android:name="com.google.android.geo.API_KEY"
-android:value="YOUR_GOOGLE_MAPS_API_KEY"/>
+- <meta-data
+- android:name="com.google.android.geo.API_KEY"
+- android:value="YOUR_GOOGLE_MAPS_API_KEY"/>
 
 # Splash Screen
-flutter pub run flutter_native_splash:create
+- flutter pub run flutter_native_splash:create
