@@ -4,42 +4,40 @@ The **Geofence Tracker App** is a user-friendly mobile application that allows u
 
 ---
 
-## 📱 Features
+### Features
 
-* ➕ **Add**, ✏️ **Edit**, ❌ **Delete** geofences.
-* 🗸️ Display geofences and current user location on Google Maps.
-* 📍 Background location tracking every 2 minutes or on significant movement.
-* 🔔 Push notifications and in-app toasts for entry/exit events.
-* 🕒 Movement history with plotted routes on maps.
-* 📌 Display polylines for movement history.
-* 🗺️ Visualize geofence areas directly on the map.
-* ⚡ Smooth UI/UX with map animations, reactive updates.
+*  **Add**,  **Edit**, **Delete** geofences.
+*  Display geo-fences and current user location on Google Maps.
+*  Background location tracking on significant movement.
+*  Push notifications and in-app toasts for entry/exit events.
+*  Movement history with plotted routes on maps.
+*  Smooth UI/UX with map animations, reactive updates.
 
 ---
 
-## 🧱 Screens Overview
+## Screens Overview
 
-### 🏠 Home Screen
+###  Home Screen
 
-* Lists all saved geofences.
+* Lists all saved geo-fences.
 * Shows status: **Inside** / **Outside**.
 * Provides Edit/Delete options.
 * Add Geofence button.
 
-### ➕ Add Geofence Screen
+###  Add Geofence Screen
 
 * Enter **Geofence Title** and **Radius (in meters)**.
 * Select center point of geofence via Google Maps.
 
-### 🕒 Movement History Screen
+###  Movement History Screen
 
 * Displays timestamped location history.
-* Visualizes user movement using polylines.
+* Visualizes user movement using poly-lines.
 * Overlays geofence boundaries for reference.
 
 ---
 
-## 📦 Packages Used
+## Packages Used
 
 | Category                     | Package                       | Purpose                         |
 | ---------------------------- | ----------------------------- | ------------------------------- |
@@ -60,91 +58,90 @@ The **Geofence Tracker App** is a user-friendly mobile application that allows u
 
 ---
 
-## 📲 Android Setup
+## Platform-Specific Setup
 
-### 📜 Required Permissions (`AndroidManifest.xml`)
+###  Android
 
-Add these **before `<application>`**:
+1. **Google Maps API Key**
+   Get your API key from the [Google Cloud Console](https://console.cloud.google.com/) and add it to `android/app/src/main/AndroidManifest.xml` inside the `<application>` tag:
 
-```xml
-<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-<uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
-<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-<uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
-<uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-<uses-permission android:name="android.permission.INTERNET" />
+   ```xml
+   <meta-data
+     android:name="com.google.android.geo.API_KEY"
+     android:value="YOUR_API_KEY"/>
+   ```
+
+2. **Background Location (If Using)**
+   Add the following permissions to `AndroidManifest.xml`:
+
+   ```xml
+   <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+   <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+   <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+   ```
+
+3. **Build APK**
+
+```bash
+flutter build apk
 ```
 
 ---
 
-### ⚙️ Service Declaration (Inside `<application>`)
+###  iOS
 
-```xml
-<service
-    android:name="id.flutter.flutter_background_service.BackgroundService"
-    android:exported="false"
-    android:foregroundServiceType="location"
-    tools:replace="android:exported,android:foregroundServiceType" />
+1. **System Requirements**
+
+    * macOS with [Xcode](https://developer.apple.com/xcode/) installed
+
+2. **Google Maps API Key**
+   Add the following line to `ios/Runner/AppDelegate.swift`:
+
+   ```swift
+   GMSServices.provideAPIKey("YOUR_API_KEY")
+   ```
+
+3. **Update Info.plist**
+   Add required permissions to `ios/Runner/Info.plist`:
+
+   ```xml
+   <key>NSLocationWhenInUseUsageDescription</key>
+   <string>This app needs access to your location.</string>
+   <key>NSLocationAlwaysUsageDescription</key>
+   <string>This app needs background location access.</string>
+   ```
+
+4. **Install CocoaPods**
+
+```bash
+cd ios
+pod install
+cd ..
 ```
+
+5. **Run the App**
+
+    * Open `ios/Runner.xcworkspace` in Xcode
+    * Choose a simulator or device
+    * Click ▶️ to build and run
 
 ---
 
-### 🔔 Notification Channel (Optional but Recommended)
-
-In `res/values/strings.xml`:
-
-```xml
-<string name="default_notification_channel_id" translatable="false">Geofence Tracker</string>
-```
-
----
-
-## 🚀 Getting Started
-
-### ✅ Clone the Repository
-
-```bash
-git clone https://github.com/your-username/geofence-tracker.git
-cd geofence-tracker
-```
-
-### 📦 Install Dependencies
-
-```bash
-flutter pub get
-```
-
-### 🗼️ Configure Splash Screen (Optional)
-
-```bash
-dart run flutter_native_splash:create
-```
-
-### ▶️ Run the App
-
-```bash
-flutter run
-```
-
----
-
-## 🔖 Project Structure
+##  Project Structure
 
 ```
 lib/
  ├─ main.dart
  ├─ controllers/      # GetX Controllers (e.g., GeofenceController)
  ├─ models/           # Data models (e.g., Geofence, Movement)
- ├─ screens/          # Home, Add Geofence, History screens
+ ├─ view/          # Home, Add Geofence, History screens
  ├─ services/         # Location services, Notification handling
- └─ widgets/          # Custom reusable widgets
+ └─ globalWidgets/          # Custom reusable widgets
 ```
 
 ---
 
-## 📌 Usage Flow
+##  Usage Flow
 
 1. **Home Screen** → Tap **➕ Add Geofence**.
 2. **Add Geofence Screen** → Select location → Enter radius → Save.
@@ -153,18 +150,10 @@ lib/
 
 ---
 
-## 🔧 Commands Reference
 
-| Task                           | Command                                 |
-| ------------------------------ | --------------------------------------- |
-| Install dependencies           | `flutter pub get`                       |
-| Run app                        | `flutter run`                           |
-| Build APK (release)            | `flutter build apk --release`           |
-| Setup splash screen (optional) | `dart run flutter_native_splash:create` |
+## Testing Guidelines
 
----
-
-## ✅ Testing Checklist
+##  Testing Checklist
 
 * **Geofence Triggering**
 
@@ -196,30 +185,3 @@ lib/
 
     * Testing has been focused on Android devices.
 
----
-
-## 🔖 Example API Response (If Required)
-
-```json
-{
-  "id": "1",
-  "title": "Office",
-  "latitude": 12.9716,
-  "longitude": 77.5946,
-  "radius": 200,
-  "status": "inside",
-  "timestamp": "2025-06-16T12:34:56Z"
-}
-```
-
----
-
-## 📖 License
-
-This repository is intended for educational and assignment purposes for Nectar Mobile.
-
----
-
-### 🙌 Contributing
-
-PRs and improvements are welcome. Please fork and open a pull request.
