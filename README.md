@@ -63,12 +63,20 @@ Add the following to your `AndroidManifest.xml`:
 
 ```xml
 <!-- Location Permissions -->
-<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-<uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+<uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
-<!-- Foreground Service -->
-<uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+<!-- Notification Permission (Android 13+) -->
+<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-<!-- Notifications (Android 13+) -->
-<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+<!-- Foreground Service Permissions -->
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+
+<!-- Battery Optimization Bypass -->
+<uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
+<!-- Internet Access -->
+<uses-permission android:name="android.permission.INTERNET" />
+
