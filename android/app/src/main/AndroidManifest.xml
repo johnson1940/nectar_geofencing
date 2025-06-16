@@ -43,7 +43,6 @@
                 android:value="2" />
         </activity>
 
-        <!-- Fixed Background Service Declaration -->
         <service
             android:name="id.flutter.flutter_background_service.BackgroundService"
             android:foregroundServiceType="location"
