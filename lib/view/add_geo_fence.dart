@@ -223,6 +223,7 @@ class AddGeofenceScreen extends StatelessWidget {
               text: geofence == null ? 'Create' : 'Update',
               fontSize: 18,
               fontWeight: FontWeight.bold,
+              color: ColorConstants.secondaryColor,
             ),
           ),
         ),
