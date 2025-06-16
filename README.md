@@ -11,6 +11,8 @@ The **Geofence Tracker App** is a user-friendly mobile application that allows u
 * 📍 Background location tracking every 2 minutes or on significant movement.
 * 🔔 Push notifications and in-app toasts for entry/exit events.
 * 🕒 Movement history with plotted routes on maps.
+* 📌 Display polylines for movement history.
+* 🗺️ Visualize geofence areas directly on the map.
 * ⚡ Smooth UI/UX with map animations, reactive updates.
 
 ---
@@ -159,6 +161,40 @@ lib/
 | Run app                        | `flutter run`                           |
 | Build APK (release)            | `flutter build apk --release`           |
 | Setup splash screen (optional) | `dart run flutter_native_splash:create` |
+
+---
+
+## ✅ Testing Checklist
+
+* **Geofence Triggering**
+
+    * Add a geofence and simulate entering or exiting it.
+    * Check if notifications are received.
+    * Verify geofence area rendering on map.
+
+* **Movement Visualization**
+
+    * Move across different areas and confirm polylines are drawn correctly.
+    * Ensure polylines stay visible when navigating screens.
+
+* **Background Tracking**
+
+    * Minimize the app and test location tracking in the background.
+    * Confirm location updates are visible in the **Movement History**.
+
+* **Permission Handling**
+
+    * Deny location permission and verify that the app gracefully prompts the user.
+    * Revoke background permissions and ensure re-authorization flow works.
+
+* **UI/UX**
+
+    * Check responsiveness on different screen sizes.
+    * Ensure that toasts and notifications appear promptly.
+
+* **Android Platform Coverage**
+
+    * Testing has been focused on Android devices.
 
 ---
 
