@@ -1,5 +1,5 @@
 name: nectar_geofencing
-description: "A new Flutter project."
+description: "Alert when a delivery is near the destination."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -33,21 +33,40 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.8
-  get: ^4.7.2
-  logger: ^2.5.0
-  fluttertoast: ^8.2.12
-  location: ^8.0.0
-  flutter_local_notifications: ^19.2.0
-  flutter_background_service: ^5.1.0
-  google_maps_flutter: ^2.12.1
-  geolocator: ^9.0.2
-  permission_handler: ^12.0.0+1
-  shared_preferences: ^2.5.3
-  rxdart: ^0.28.0
-  intl: ^0.19.0
-  flutter_polyline_points: ^2.1.0
-  flutter_native_splash:
+  # -------------------
+  # UI / UX Enhancements
+  # -------------------
+  cupertino_icons: ^1.0.8        # iOS-style icons
+  fluttertoast: ^8.2.12          # Toast messages
+  flutter_native_splash:         # Splash screen
+
+  # -------------------
+  # State Management & Utilities
+  # -------------------
+  get: ^4.7.2                    # State management & routing
+  logger: ^2.5.0                 # Logging utility
+  shared_preferences: ^2.5.3     # Local key-value storage
+  rxdart: ^0.28.0                # Reactive programming support
+  intl: ^0.19.0                  # Date, number formatting
+
+  # -------------------
+  # Location & Maps
+  # -------------------
+  location: ^8.0.0               # Get device location
+  geolocator: ^9.0.2             # Location + geocoding
+  google_maps_flutter: ^2.12.1   # Google Maps integration
+  flutter_polyline_points: ^2.1.0 # Decode polylines
+
+  # -------------------
+  # Permissions & Background Services
+  # -------------------
+  permission_handler: ^12.0.0+1  # Request/check permissions
+  flutter_background_service: ^5.1.0 # Background services
+
+  # -------------------
+  # Notifications
+  # -------------------
+  flutter_local_notifications: ^19.2.0 # Local notifications
 
 # For the Native splash
 flutter_native_splash:

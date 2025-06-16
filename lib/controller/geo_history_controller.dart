@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:nectar_geofencing/helper/toaster.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../helper/logger.dart';
@@ -9,23 +10,27 @@ import '../model/location_history.dart';
 import 'geo_fence_Controller.dart';
 
 class GeoFenceHistoryController extends GetxController {
-  /// Observables
+
   final Rx<LatLng> mapPosition = const LatLng(11.005064, 76.950846).obs;
+
   final Rx<GoogleMapController?> googleMapController = Rxn<GoogleMapController>();
+
   final RxBool isMapLoading = true.obs;
+
   final RxBool isPolylineLoading = true.obs;
 
-  /// Map Elements
   final RxMap<PolylineId, Polyline> polyLines = <PolylineId, Polyline>{}.obs;
+
   final RxMap<MarkerId, Marker> markers = <MarkerId, Marker>{}.obs;
 
-  /// Dependencies
   final GeofenceController geofenceController = Get.find<GeofenceController>();
 
-  /// Polyline colors & cache
   final Map<String, Color> geofenceColors = {};
+
   final Color polylineColor = Colors.red;
+
   final Map<String, List<LatLng>> _polylineCache = {};
+
   SharedPreferences? _prefs;
 
   @override
@@ -33,7 +38,7 @@ class GeoFenceHistoryController extends GetxController {
     super.onInit();
     _prefs = await SharedPreferences.getInstance();
     await initializeMapPosition();
-    await loadHistoryPolylines();
+    await renderHistoricalRoutes();
   }
 
   @override
@@ -53,7 +58,7 @@ class GeoFenceHistoryController extends GetxController {
     }
   }
 
-  Future<void> loadHistoryPolylines({int limit = 50}) async {
+  Future<void> renderHistoricalRoutes({int limit = 100}) async {
     isPolylineLoading.value = true;
     polyLines.clear();
     markers.clear();
@@ -63,6 +68,9 @@ class GeoFenceHistoryController extends GetxController {
 
       groupedHistory.forEach((title, entries) async {
         final color = geofenceColors[title] = polylineColor;
+        for (var title in groupedHistory.keys) {
+          geofenceColors[title] = polylineColor; // or any color you prefer
+        }
 
         _addMarkers(entries, title, color);
 
@@ -74,7 +82,7 @@ class GeoFenceHistoryController extends GetxController {
 
       await _animateCameraToCoordinates(polyLines.values.expand((p) => p.points).toList());
     } catch (e) {
-      logger.e('Error loading history polylines: $e');
+      Toast.showToast('Error Loading Poly-lines');
     } finally {
       isPolylineLoading.value = false;
       update();

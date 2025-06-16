@@ -76,6 +76,17 @@ android {
         }
     }
 
+    flavorDimensions "mode"
+    productFlavors {
+
+        dev {
+            dimension "mode"
+        }
+        live {
+            dimension "mode"
+        }
+    }
+
 }
 
 dependencies {

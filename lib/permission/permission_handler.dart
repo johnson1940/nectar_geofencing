@@ -6,85 +6,80 @@ import '../helper/toaster.dart';
 import '../services/notification_service.dart';
 
 Future<bool> requestGeofencePermissions(NotificationService notificationService) async {
-  bool canStartService = true;
-
   try {
-    // Step 1: Check Location Services
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
+    /// Step 1: Ensure Location Services are Enabled
+    if (!await Geolocator.isLocationServiceEnabled()) {
       openAppSettings();
-      serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        Toast.showToast('Location services are required for tracking.');
+      if (!await Geolocator.isLocationServiceEnabled()) {
+        Toast.showToast('Please enable location services to allow tracking.');
         return false;
       }
     }
 
-    // Step 2: Request Foreground Location Permission
+    /// Step 2: Check Foreground Location Permission
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        Toast.showToast('Please allow location access.');
+        Toast.showToast('Location access is required for tracking your movements.');
         return false;
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
       openAppSettings();
-      permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.deniedForever) {
-        Toast.showToast('Location permission is required for tracking.');
+      if (await Geolocator.checkPermission() == LocationPermission.deniedForever) {
+        Toast.showToast('Please allow location access from app settings to continue.');
         return false;
       }
     }
 
+    /// Android-specific permissions
     if (Platform.isAndroid) {
-      // Step 3: Request Background Location
-      var status = await Permission.locationAlways.status;
-      if (!status.isGranted) {
-        status = await Permission.locationAlways.request();
-        if (!status.isGranted) {
-          openAppSettings();
-          status = await Permission.locationAlways.status;
-          if (!status.isGranted) {
-            Toast.showToast('Background location access is required.');
-            return false;
-          }
-        }
+      /// Step 3: Background Location
+      if (!await _checkAndRequestPermission(
+          Permission.locationAlways,
+          'To track location in the background, please allow "All the time" location access in settings.')) {
+        return false;
       }
 
-      // Step 4: Request Notification Permission
-      status = await Permission.notification.status;
-      if (!status.isGranted) {
-        status = await Permission.notification.request();
-        if (!status.isGranted) {
-          openAppSettings();
-          status = await Permission.notification.status;
-          if (!status.isGranted) {
-            Toast.showToast('Notifications are required for geofence alerts.');
-            return false;
-          }
-        }
+      /// Step 4: Notification Permission
+      if (!await _checkAndRequestPermission(
+          Permission.notification,
+          'Enable notifications to receive geofence alerts and updates.')) {
+        return false;
       }
 
-      // Step 5: Request Battery Optimization Exception (Optional)
-      status = await Permission.ignoreBatteryOptimizations.status;
-      if (!status.isGranted) {
-        status = await Permission.ignoreBatteryOptimizations.request();
-        if (!status.isGranted) {
-          openAppSettings();
-          // Optional: Proceed even if not granted
-        }
-      }
+      /// Step 5: Ignore Battery Optimizations (Optional)
+      await _checkAndRequestPermission(
+        Permission.ignoreBatteryOptimizations,
+        'To ensure accurate tracking, consider disabling battery optimizations for this app.',
+      );
     }
 
+    /// Step 6: Initialize Service
     await notificationService.initializeBackgroundService();
     logger.i('All required permissions granted');
     return true;
   } catch (e) {
     logger.e('Failed to request permissions: $e');
-    Toast.showToast('Failed to request permissions: $e');
+    Toast.showToast('Something went wrong while requesting permissions.');
     return false;
   }
+}
+
+/// Utility method to check and request a specific permission
+Future<bool> _checkAndRequestPermission(Permission permission, [String? failureMessage]) async {
+  if (await permission.isGranted) return true;
+
+  await permission.request();
+  if (await permission.isGranted) return true;
+
+  openAppSettings();
+  if (await permission.isGranted) return true;
+
+  if (failureMessage != null) {
+    Toast.showToast(failureMessage);
+  }
+  return false;
 }

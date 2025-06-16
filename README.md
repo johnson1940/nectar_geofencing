@@ -1,16 +1,57 @@
-# nectar_geofencing
+# 🛰️ Geofence Tracker App (Nectar Mobile Assignment - #GTA)
 
-A new Flutter project.
+The **Geofence Tracker App** is a powerful and user-friendly mobile application that allows users to monitor their movements in relation to predefined geofences. It stores geofence data locally, tracks user location periodically, and provides real-time alerts when entering or exiting geofenced areas.
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## 📱 Features
 
-A few resources to get you started if this is your first Flutter project:
+- Add, edit, and delete geo-fences.
+- Visual geo-fences on Google Maps.
+- Periodic background location tracking.
+- Entry/exit detection with push notifications.
+- Movement history with route rendering.
+- Smooth UI/UX with map animations and toast messages.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 📸 Screens
+
+### 🏠 Home Screen
+- Lists all saved geo-fences.
+- Displays geofence status (Inside / Outside).
+- Options to edit/delete geo-fences.
+- Button to add a new geofence.
+
+### Add Geofence Screen
+- Add title, radius, and select location on map.
+- Save data to local storage.
+
+###  Movement History Screen
+- List of recorded location events.
+- Map displaying routes and geo-fenced areas.
+- The user's movement history as plotted poly-lines (routes).
+
+### Packages Used and their Use cases
+| Package                          | Purpose                                     |
+| -------------------------------- | ------------------------------------------- |
+| **UI / UX**                      |                                             |
+| `cupertino_icons`                | iOS-style icons                             |
+| `fluttertoast`                   | Toast-style in-app alerts                   |
+| `flutter_native_splash`          | Launch splash screen                        |
+| **State Management & Utilities** |                                             |
+| `get`                            | Routing and reactive state management       |
+| `logger`                         | Debug and logging utility                   |
+| `shared_preferences`             | Local key-value data storage                |
+| `intl`                           | Timestamp and date formatting               |
+| `rxdart`                         | Advanced reactive programming               |
+| **Location & Maps**              |                                             |
+| `geolocator`                     | Real-time and background location services  |
+| `location`                       | Location access abstraction                 |
+| `google_maps_flutter`            | Google Maps rendering                       |
+| `flutter_polyline_points`        | Decoding polylines for routes               |
+| **Permissions & Background**     |                                             |
+| `permission_handler`             | Runtime permission requests                 |
+| `flutter_background_service`     | Keep location tracking active in background |
+| **Notifications**                |                                             |
+| `flutter_local_notifications`    | Local notifications on geofence triggers    |

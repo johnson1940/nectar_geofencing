@@ -95,7 +95,7 @@ class HistoryScreen extends StatelessWidget {
                   if (geofenceController.locationHistory.isEmpty) {
                     return Center(
                       child: CustomTextWidget(
-                        text: 'No data at this moment',
+                        text: "Looks like there's nothing here yet",
                         color: ColorConstants.primaryColor,
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
