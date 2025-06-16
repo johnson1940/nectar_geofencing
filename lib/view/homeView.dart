@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nectar_geofencing/constants/image_constants.dart';
 import '../constants/color_constants.dart';
 import '../controller/geo_fence_Controller.dart';
 import '../globalWidgets/custom_text_field.dart';
@@ -27,6 +28,10 @@ class HomeScreen extends StatelessWidget {
           backgroundColor: Colors.grey[100],
           appBar: _buildAppBar(screenSize),
           body: Obx(() {
+            if (controller.isLoading.value) {
+              return Center(child: CircularProgressIndicator());
+            }
+
             return controller.geoFencesList.isEmpty
                 ? _buildEmptyState(screenSize)
                 : _buildGeofenceList(controller, screenSize);
@@ -60,19 +65,26 @@ class HomeScreen extends StatelessWidget {
   Widget _buildEmptyState(Size screenSize) {
     return Center(
       child: Padding(
-        padding: EdgeInsets.only(top: screenSize.height * 0.06),
-        child: CustomTextWidget(
-          text: 'No data at this moment',
-          color: ColorConstants.blackColor,
-          fontSize: 16,
-          textAlign: TextAlign.center,
-          fontWeight: FontWeight.bold,
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.location_off, color: ColorConstants.grey, size: 70,),
+            SizedBox(height: 10,),
+            CustomTextWidget(
+              text: "Looks like you haven't added any locations yet. Try adding one!",
+              fontSize: 16,
+              textAlign: TextAlign.center,
+              fontWeight: FontWeight.bold,
+              maxLines: 3,
+            ),
+          ],
         ),
       ),
     );
   }
 
-  /// Builds the list of geofences
+  /// Builds the list of geo-fences
   Widget _buildGeofenceList(GeofenceController controller, Size screenSize) {
     return ListView.builder(
       padding: EdgeInsets.all(screenSize.width * 0.02),
@@ -87,32 +99,34 @@ class HomeScreen extends StatelessWidget {
   /// Card for each Geofence item
   Widget _buildGeofenceCard(Geofence geofence, int index) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       color: Colors.white,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 18.0),
+        padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// --- Title and Status Dot
+            /// --- Title & Status
             Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: CustomTextWidget(
-                    text: geofence.title,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 18,
-                    color: ColorConstants.primaryColor,
+                  child: Text(
+                    geofence.title,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: ColorConstants.primaryColor,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 Row(
                   children: [
                     Container(
-                      width: 10,
-                      height: 10,
+                      width: 8,
+                      height: 8,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: geofence.isInside ? Colors.green : ColorConstants.grey,
@@ -122,33 +136,31 @@ class HomeScreen extends StatelessWidget {
                     Text(
                       geofence.isInside ? "Inside" : "Outside",
                       style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 12,
                         color: geofence.isInside ? Colors.green : ColorConstants.grey,
                       ),
-                    )
+                    ),
                   ],
-                )
+                ),
               ],
             ),
 
-            const SizedBox(height: 14),
+            const SizedBox(height: 10),
 
             /// --- Lat, Long, Radius
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildInfoRow("Latitude", geofence.latitude.toStringAsFixed(4)),
-                const SizedBox(height: 4),
                 _buildInfoRow("Longitude", geofence.longitude.toStringAsFixed(4)),
-                const SizedBox(height: 4),
                 _buildInfoRow("Radius", "${geofence.radius} m"),
               ],
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
 
-            /// --- Edit & Delete Buttons
+            /// --- Action Buttons
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -158,52 +170,51 @@ class HomeScreen extends StatelessWidget {
                   color: ColorConstants.primaryColor,
                   onTap: () => Get.to(() => AddGeofenceScreen(geofence: geofence, index: index)),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 _iconButton(
                   icon: Icons.delete,
                   tooltip: "Delete",
                   color: Colors.red,
-                  onTap: () => geofenceController.deleteGeofence(index),
+                  onTap: () => geofenceController.deleteGeofence(index, geofence),
                 ),
               ],
-            )
+            ),
           ],
         ),
       ),
     );
   }
 
-
   Widget _buildInfoRow(String label, String value) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 80,
-          child: Text(
-            "$label:",
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
-              color: ColorConstants.blackColor,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 70,
+            child: Text(
+              "$label:",
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+                color: ColorConstants.blackColor,
+              ),
             ),
           ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            value,
-            style: TextStyle(
-              fontWeight: FontWeight.normal,
-              fontSize: 14,
-              color: ColorConstants.blackColor,
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 13,
+                color: ColorConstants.blackColor,
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
-
 
   Widget _iconButton({
     required IconData icon,
@@ -215,21 +226,20 @@ class HomeScreen extends StatelessWidget {
       message: tooltip,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(20),
         child: Container(
-          padding: const EdgeInsets.all(10),
+          padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: color.withOpacity(0.1),
+            color: color.withOpacity(0.12),
           ),
           child: Icon(
             icon,
             color: color,
-            size: 22,
+            size: 20,
           ),
         ),
       ),
     );
   }
-
 }

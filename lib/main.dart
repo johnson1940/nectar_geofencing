@@ -15,7 +15,6 @@ void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
 
-  /// Orientation
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
@@ -26,8 +25,6 @@ void main() async {
       statusBarIconBrightness: Brightness.dark,
     ),
   );
-
-
 
   /// Initialize SharedPreferences
   await SharedPreferences.getInstance();
@@ -58,7 +55,7 @@ class MyApp extends StatelessWidget {
             debugShowCheckedModeBanner: false,
             initialBinding: GlobalBinding(),
             useInheritedMediaQuery: true,
-            title: 'Geofence Tracker',
+            title: 'Locatr',
             darkTheme: ThemeData.dark(),
             initialRoute: '/',
             theme: ThemeData(
@@ -66,11 +63,7 @@ class MyApp extends StatelessWidget {
               useMaterial3: true,
               visualDensity: VisualDensity.adaptivePlatformDensity,
             ),
-            getPages: [
-
-            ],
             defaultTransition: Transition.rightToLeft,
-
             home: MyHomePage(),
           );
         },
@@ -96,40 +89,11 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     return MainScreen();
   }
 
-
-
   @override
   void initState() {
     WidgetsBinding.instance.addObserver(this);
-
     super.initState();
   }
-
-
-  ///Flutter LifeCycleState
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-
-    switch (state) {
-      case AppLifecycleState.resumed:
-        logger.i("App is in the foreground (Resumed)");
-        break;
-      case AppLifecycleState.inactive:
-        logger.i("App is inactive");
-        break;
-      case AppLifecycleState.paused:
-        logger.i("App is in the background (Paused)");
-        break;
-      case AppLifecycleState.detached:
-        logger.i("App is detached");
-        break;
-      case AppLifecycleState.hidden:
-        logger.i("App is in hidden state"); // ✅ fixed
-        break;
-    }
-  }
-
 
   @override
   void dispose() {

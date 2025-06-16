@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../helper/logger.dart';
@@ -68,8 +69,8 @@ class NotificationService {
           autoStart: true,
           isForegroundMode: true,
           notificationChannelId: 'geofence_background',
-          initialNotificationTitle: 'Geofence Tracker',
-          initialNotificationContent: 'Monitoring location in background',
+          initialNotificationTitle: 'Locatr',
+          initialNotificationContent: 'Background location tracking enabled',
           foregroundServiceNotificationId: 888,
           foregroundServiceTypes: [AndroidForegroundType.location],
         ),
@@ -109,8 +110,8 @@ class NotificationService {
       if (service is AndroidServiceInstance) {
         await service.setAsForegroundService();
         service.setForegroundNotificationInfo(
-          title: 'Geofence Tracker',
-          content: 'Monitoring location in background',
+          title:   'Locatr',
+          content: 'Background location tracking enabled',
         );
       }
 
@@ -160,28 +161,33 @@ class NotificationService {
         final index = update['index'] as int;
         final status = update['status'] as String;
         final geofence = geofences[index];
+
+
         logger.i('Background geofence event: $status ${geofence.title}');
-        await showNotification(
-          geofence.title,
-          '$status ${geofence.title} '
-              'at (${geofence.latitude.toStringAsFixed(4)}, ${geofence.longitude.toStringAsFixed(4)})',
-        );
+        // showNotification(
+        //   geofence.title,
+        //   '$status ${geofence.title} '
+        //       'at (${geofence.latitude.toStringAsFixed(4)}, ${geofence.longitude.toStringAsFixed(4)})',
+        // );
         final prefs = await SharedPreferences.getInstance();
         final historyList = prefs.getString('history') ?? '[]';
         final List<LocationHistoryEntry> history = (jsonDecode(historyList) as List).map((json) => LocationHistoryEntry.fromJson(json)).toList();
-        history.add(LocationHistoryEntry(
-          timestamp: DateTime.now(),
-          latitude: position.latitude,
-          longitude: position.longitude,
-          status: status,
-          title: geofence.title, // Add geofence title
-        ));
+        history.add(
+            LocationHistoryEntry(
+               timestamp: DateTime.now(),
+               latitude: position.latitude,
+               longitude: position.longitude,
+               status: status,
+               title: geofence.title, // Add geofence title
+           )
+        );
         await prefs.setString('history', jsonEncode(history.map((h) => h.toJson()).toList()));
       }
     } catch (e) {
       logger.e('Error checking geofences in background: $e');
     }
   }
+
 
   static List<Map<String, dynamic>> _checkGeofencesIsolate(Map<String, dynamic> data) {
     try {
@@ -228,7 +234,6 @@ class NotificationService {
         channelDescription: 'Notifications for geofence entry and exit events',
         importance: Importance.high,
         priority: Priority.high,
-        icon: '@mipmap/ic_launcher',
       );
       const DarwinNotificationDetails iosPlatformChannelSpecifics = DarwinNotificationDetails(
         presentSound: true,

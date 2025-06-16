@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:location/location.dart' as location;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,6 +22,7 @@ class GeofenceController extends GetxController {
   var currentPosition = Rxn<Position>(); // Current position of the device
   var currentLatitude = ''.obs;
   var currentLongitude = ''.obs;
+  var isLoading = true.obs; // default is loading
   var isTracking = false.obs; // Flag to show whether tracking is active
   Timer? _locationTimer; // Timer for periodic location updates
   StreamSubscription<Position>? _positionStream; // Stream to listen to live location
@@ -55,13 +58,16 @@ class GeofenceController extends GetxController {
   /// Loads geo-fences from SharedPreferences and populates `geoFencesList`.
   Future<void> loadGeoFencesFromStorage() async {
     try {
+      isLoading.value = true;
       final prefs = await SharedPreferences.getInstance();
       final geofenceList = prefs.getString('geofences') ?? '[]';
       final List<dynamic> jsonList = jsonDecode(geofenceList);
       geoFencesList.assignAll(jsonList.map((json) => Geofence.fromJson(json)).toList());
       logger.i('Geo-fences Items: ${geoFencesList.length}');
+      isLoading.value = false;
     } catch (e) {
-      logger.e('Failed to load:  $e');
+      Toast.showToast('Failed to load data from local storage');
+      isLoading.value = false;
     }
   }
 
@@ -130,9 +136,9 @@ class GeofenceController extends GetxController {
     try {
       geoFencesList.add(geofence);
       await saveGeoFencesToStorage();
-      logger.i('Geofence added: ${geofence.title}');
+      Toast.showToast('Successfully added "${geofence.title}"!');
     } catch (e) {
-      logger.e('Failed to add geofence: $e');
+      Toast.showToast('Failed to store!');
     }
   }
 
@@ -141,18 +147,19 @@ class GeofenceController extends GetxController {
     try {
       geoFencesList[index] = geofence;
       await saveGeoFencesToStorage();
-      logger.i('Geofence updated at index: $index');
+      Toast.showToast('Location "${geofence.title}" updated successfully!');
     } catch (e) {
-      logger.e('Failed to update geofence: $e');
+      Toast.showToast('Failed to update!');
     }
   }
 
   /// Removes a geofence at the specified index and persists the updated list.
-  Future<void> deleteGeofence(int index) async {
+  Future<void> deleteGeofence(int index, Geofence geofence) async {
     try {
+      geoFencesList[index] = geofence;
       geoFencesList.removeAt(index);
       await saveGeoFencesToStorage();
-      logger.i('Geofence deleted at index: $index');
+      Toast.showToast('Location "${geofence.title}" deleted successfully!');
     } catch (e) {
       logger.e('Failed to delete geofence: $e');
     }
@@ -267,10 +274,12 @@ class GeofenceController extends GetxController {
         final geofence = geoFencesList[index];
         geofence.isInside = status == 'Entered';
         geoFencesList[index] = geofence;
-
+        final emoji = status == 'Entered' ? '✅' : '⚠️';
+        final title = '$emoji You have $status “${geofence.title}';
+        final body = '''Lat: ${geofence.latitude.toStringAsFixed(4)}, Long: ${geofence.longitude.toStringAsFixed(4)}, Radius: ${geofence.radius.toStringAsFixed(0)} m''';
         await NotificationService.showNotification(
-          geofence.title,
-          '$status ${geofence.title} at (${geofence.latitude.toStringAsFixed(4)}, ${geofence.longitude.toStringAsFixed(4)})',
+          title,
+          body,
         );
 
         addHistory(LocationHistoryEntry(
