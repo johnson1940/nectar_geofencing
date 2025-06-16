@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:get/get.dart';
 import '../constants/color_constants.dart';
-import '../controller/create_geo_fence_controller.dart';
+import '../controller/add_geo_fence_controller.dart';
 import '../controller/geo_fence_Controller.dart';
 import '../globalWidgets/custom_text_field.dart';
 import '../model/geo_fence_model.dart';
@@ -29,7 +29,9 @@ class AddGeofenceScreen extends StatelessWidget {
           backgroundColor: Colors.grey[100],
           appBar: _buildAppBar(screenSize),
           body: _buildBody(screenSize, controller),
+          bottomNavigationBar: _buildSubmitButton(screenSize, controller),
         );
+
       },
     );
   }
@@ -86,8 +88,6 @@ class AddGeofenceScreen extends StatelessWidget {
               _buildTextFieldLocation(),
               SizedBox(height: screenSize.height * 0.01),
               _buildMap(screenSize, controller),
-              SizedBox(height: screenSize.height * 0.04),
-              _buildSubmitButton(screenSize, controller)
             ],
           ),
 
@@ -126,7 +126,7 @@ class AddGeofenceScreen extends StatelessWidget {
           decoration: BoxDecoration(
             color: ColorConstants.secondaryColor,
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: ColorConstants.grey),
+            border: Border.all(color: ColorConstants.grey, width: 0.3),
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(10),
@@ -185,43 +185,48 @@ class AddGeofenceScreen extends StatelessWidget {
   }
 
   Widget _buildSubmitButton(Size screenSize, AddGeoFenceController controller) {
-    return SizedBox(
-      width: screenSize.width,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: ColorConstants.primaryColor,  // Button background color
-          foregroundColor: ColorConstants.secondaryColor, // Text/Icon color
-          padding: EdgeInsets.symmetric(vertical: screenSize.height * 0.015),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          elevation: 3,
-        ),
-        onPressed: () {
-          if (_formKey.currentState!.validate() && controller.selectedLocation.value != null) {
-            final newGeofence = Geofence(
-              title: controller.titleController.text,
-              latitude: controller.selectedLocation.value!.latitude,
-              longitude: controller.selectedLocation.value!.longitude,
-              radius: double.parse(controller.radiusController.text),
-            );
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.only(left: 16, right: 16),
+        child: SizedBox(
+          width: screenSize.width,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: ColorConstants.primaryColor,  // Button background color
+              foregroundColor: ColorConstants.secondaryColor, // Text/Icon color
+              padding: EdgeInsets.symmetric(vertical: screenSize.height * 0.015),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              elevation: 3,
+            ),
+            onPressed: () {
+              if (_formKey.currentState!.validate() && controller.selectedLocation.value != null) {
+                final newGeofence = Geofence(
+                  title: controller.titleController.text,
+                  latitude: controller.selectedLocation.value!.latitude,
+                  longitude: controller.selectedLocation.value!.longitude,
+                  radius: double.parse(controller.radiusController.text),
+                );
 
-            if (geofence == null) {
-              geofenceController.saveNewGeofence(newGeofence);
-            } else {
-              geofenceController.updateGeofence(index!, newGeofence);
-            }
+                if (geofence == null) {
+                  addGeoFenceController.saveNewGeofence(newGeofence);
+                } else {
+                  addGeoFenceController.updateGeofence(index!, newGeofence);
+                }
 
-            Get.back();
-          } else if (controller.selectedLocation.value == null) {
-            Get.snackbar('Error', 'Please select a location on the map');
-          }
-        },
-        child: Text(
-          geofence == null ? 'Create' : 'Update',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
+                Get.back();
+              } else if (controller.selectedLocation.value == null) {
+                Get.snackbar('Error', 'Please select a location on the map');
+              }
+            },
+            child: Text(
+              geofence == null ? 'Create' : 'Update',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ),
       ),

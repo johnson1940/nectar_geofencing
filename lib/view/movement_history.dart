@@ -7,11 +7,25 @@ import '../controller/geo_history_controller.dart';
 import '../globalWidgets/custom_text_field.dart';
 import 'package:intl/intl.dart';
 
-class HistoryScreen extends StatelessWidget {
-  final GeofenceController geofenceController = Get.find<GeofenceController>();
-  final GeoFenceHistoryController geoFenceHistoryController = Get.find<GeoFenceHistoryController>();
+class MovementHistoryScreen extends StatefulWidget {
 
-  HistoryScreen({super.key});
+  const MovementHistoryScreen({super.key});
+
+  @override
+  State<MovementHistoryScreen> createState() => _MovementHistoryScreenState();
+}
+
+class _MovementHistoryScreenState extends State<MovementHistoryScreen> {
+  final GeofenceController geofenceController = Get.find<GeofenceController>();
+
+  final MovementHistoryController geoFenceHistoryController = Get.find<MovementHistoryController>();
+
+  @override
+  void initState() {
+    super.initState();
+    // 🔔 Call your function here when screen opens
+    geoFenceHistoryController.renderHistoricalRoutes();  // Example
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +134,6 @@ class HistoryScreen extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Row with Title (left) and Status (right)
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 crossAxisAlignment: CrossAxisAlignment.start,

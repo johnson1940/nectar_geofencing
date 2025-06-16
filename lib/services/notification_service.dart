@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../helper/logger.dart';
@@ -33,20 +32,19 @@ class NotificationService {
       );
       bool? initialized = await flutterLocalNotificationsPlugin.initialize(initializationSettings);
       if (initialized != true) {
-       // logger.e('Notification initialization failed');
         throw Exception('Failed to initialize notifications');
       }
       if (Platform.isAndroid) {
         const AndroidNotificationChannel backgroundChannel = AndroidNotificationChannel(
-          'geofence_background',
-          'Geofence Background Service',
-          description: 'Notification channel for geofence background service',
+          'locatr_background_channel',
+          'locatr Background Service',
+          description: 'Keeps the app running in the background to detect geofence events',
           importance: Importance.low,
         );
         const AndroidNotificationChannel geofenceChannel = AndroidNotificationChannel(
-          'geofence_channel',
-          'Geofence Notifications',
-          description: 'Notifications for geofence entry and exit events',
+          'locatr_channel',
+          'locatr Notifications',
+          description: 'Alerts you when entering or exiting a geo-fenced area',
           importance: Importance.high,
         );
         final androidPlugin = flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
@@ -55,7 +53,6 @@ class NotificationService {
        // logger.i('Notification channels created');
       }
     } catch (e) {
-      //logger.e('Failed to initialize notifications: $e');
       Toast.showToast('Notifications may not work. Please check permissions.');
     }
   }
@@ -68,7 +65,7 @@ class NotificationService {
           onStart: onBackgroundServiceStart,
           autoStart: true,
           isForegroundMode: true,
-          notificationChannelId: 'geofence_background',
+          notificationChannelId: 'locatr_background_channel',
           initialNotificationTitle: 'Locatr',
           initialNotificationContent: 'Background location tracking enabled',
           foregroundServiceNotificationId: 888,
@@ -83,7 +80,6 @@ class NotificationService {
       await service.startService();
       logger.i('Background service initialized and started');
     } catch (e) {
-      logger.e('Failed to initialize background service: $e');
       Toast.showToast('Failed to start background service');
     }
   }
@@ -144,7 +140,7 @@ class NotificationService {
         final List<Geofence> geofences = (jsonDecode(geofenceList) as List).map((json) => Geofence.fromJson(json)).toList();
         await _checkGeofencesInBackground(position, geofences);
       } catch (e) {
-       // logger.e('iOS background location update failed: $e');
+
       }
     });
     return true;
@@ -152,7 +148,7 @@ class NotificationService {
 
   static Future<void> _checkGeofencesInBackground(Position position, List<Geofence> geofences) async {
     try {
-      final updates = _checkGeofencesIsolate({'position': position, 'geofences': geofences});
+      final updates = detectGeofenceStatusChanges({'position': position, 'geofences': geofences});
       if (updates.isEmpty) {
         logger.i('No geofence status changes detected in background');
         return;
@@ -162,13 +158,6 @@ class NotificationService {
         final status = update['status'] as String;
         final geofence = geofences[index];
 
-
-        logger.i('Background geofence event: $status ${geofence.title}');
-        // showNotification(
-        //   geofence.title,
-        //   '$status ${geofence.title} '
-        //       'at (${geofence.latitude.toStringAsFixed(4)}, ${geofence.longitude.toStringAsFixed(4)})',
-        // );
         final prefs = await SharedPreferences.getInstance();
         final historyList = prefs.getString('history') ?? '[]';
         final List<LocationHistoryEntry> history = (jsonDecode(historyList) as List).map((json) => LocationHistoryEntry.fromJson(json)).toList();
@@ -184,12 +173,12 @@ class NotificationService {
         await prefs.setString('history', jsonEncode(history.map((h) => h.toJson()).toList()));
       }
     } catch (e) {
-      logger.e('Error checking geofences in background: $e');
+       logger.i('Error : $e');
     }
   }
 
 
-  static List<Map<String, dynamic>> _checkGeofencesIsolate(Map<String, dynamic> data) {
+  static List<Map<String, dynamic>> detectGeofenceStatusChanges(Map<String, dynamic> data) {
     try {
       final position = data['position'] as Position;
       final geofences = data['geofences'] as List<Geofence>;
@@ -213,7 +202,7 @@ class NotificationService {
       }
       return updates;
     } catch (e) {
-      logger.e('Error in geofence isolate: $e');
+
       return [];
     }
   }
@@ -224,13 +213,13 @@ class NotificationService {
       if (Platform.isAndroid) {
         var status = await Permission.notification.status;
         if (!status.isGranted) {
-          logger.w('Notification permission not granted');
+          Toast.showToast('Notification Permission Not Enabled');
           return;
         }
       }
       const AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
-        'geofence_channel',
-        'Geofence Notifications',
+        'locatr_channel',
+        'locatr Notifications',
         channelDescription: 'Notifications for geofence entry and exit events',
         importance: Importance.high,
         priority: Priority.high,
@@ -251,9 +240,8 @@ class NotificationService {
         platformChannelSpecifics,
 
       );
-      logger.i('Notification shown: $title - $body');
     } catch (e) {
-      logger.e('Failed to show notification: $e');
+      logger.e('Notification Error: $e');
     }
   }
 

@@ -1,10 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:location/location.dart' as location;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,15 +15,25 @@ import '../services/notification_service.dart';
 
 @pragma('vm:entry-point')
 class GeofenceController extends GetxController {
+
   var geoFencesList = <Geofence>[].obs; // List of saved geofences
+
   var locationHistory = <LocationHistoryEntry>[].obs; // List of recorded location history
+
   var currentPosition = Rxn<Position>(); // Current position of the device
+
   var currentLatitude = ''.obs;
+
   var currentLongitude = ''.obs;
+
   var isLoading = true.obs; // default is loading
+
   var isTracking = false.obs; // Flag to show whether tracking is active
+
   Timer? _locationTimer; // Timer for periodic location updates
+
   StreamSubscription<Position>? _positionStream; // Stream to listen to live location
+
   Timer? _permissionRecheckTimer; // Timer to recheck permissions
 
   late final NotificationService notificationService; // For triggering notifications
@@ -48,9 +56,8 @@ class GeofenceController extends GetxController {
       currentLatitude.value = position.latitude.toString();
       currentLongitude.value = position.longitude.toString();
       currentPosition.value = position;
-      logger.i('Current location: Lat: ${currentLatitude.value}, Long: ${currentLongitude.value}');
+      logger.i('📍 Current location retrieved: Latitude=${currentLatitude.value}, Longitude=${currentLongitude.value}');
     } catch (e) {
-      logger.e('Failed to get current location: $e');
       Toast.showToast('Failed to get location: $e');
     }
   }
@@ -63,7 +70,7 @@ class GeofenceController extends GetxController {
       final geofenceList = prefs.getString('geofences') ?? '[]';
       final List<dynamic> jsonList = jsonDecode(geofenceList);
       geoFencesList.assignAll(jsonList.map((json) => Geofence.fromJson(json)).toList());
-      logger.i('Geo-fences Items: ${geoFencesList.length}');
+      logger.i('✅ Loaded ${geoFencesList.length} geofences from local storage');
       isLoading.value = false;
     } catch (e) {
       Toast.showToast('Failed to load data from local storage');
@@ -79,7 +86,6 @@ class GeofenceController extends GetxController {
       final List<dynamic> jsonList = jsonDecode(historyList);
       final List<LocationHistoryEntry> loadedHistory = jsonList.map((json) => LocationHistoryEntry.fromJson(json)).toList();
 
-      // Migrates old entries missing `title` field by finding the closest geofence.
       for (var entry in loadedHistory) {
         if (entry.title == null) {
           Geofence? closestGeofence;
@@ -101,9 +107,9 @@ class GeofenceController extends GetxController {
       }
 
       locationHistory.assignAll(loadedHistory);
-      logger.i('History loaded: ${locationHistory.length}');
+      logger.i('📖 Location history loaded: ${locationHistory.length} entries');
     } catch (e) {
-      logger.e('Failed to load history: $e');
+      logger.i('Error in loading history : $e');
     }
   }
 
@@ -113,9 +119,9 @@ class GeofenceController extends GetxController {
       final prefs = await SharedPreferences.getInstance();
       final jsonList = geoFencesList.map((geofence) => geofence.toJson()).toList();
       await prefs.setString('geofences', jsonEncode(jsonList));
-      logger.i('Saved Successful');
+      logger.i('💾 Geofences saved to local storage successfully');
     } catch (e) {
-      logger.e('Failed to save geofences: $e');
+      logger.i('Geofence Saved Error: $e');
     }
   }
 
@@ -125,43 +131,9 @@ class GeofenceController extends GetxController {
       final prefs = await SharedPreferences.getInstance();
       final jsonList = locationHistory.map((entry) => entry.toJson()).toList();
       await prefs.setString('history', jsonEncode(jsonList));
-      logger.i('History saved');
+      logger.i('🕒 Location history saved to local storage');
     } catch (e) {
       logger.e('Failed to save history: $e');
-    }
-  }
-
-  /// Adds a new geofence to the list and persists it.
-  Future<void> saveNewGeofence(Geofence geofence) async {
-    try {
-      geoFencesList.add(geofence);
-      await saveGeoFencesToStorage();
-      Toast.showToast('Successfully added "${geofence.title}"!');
-    } catch (e) {
-      Toast.showToast('Failed to store!');
-    }
-  }
-
-  /// Updates an existing geofence at the specified index and saves the changes.
-  Future<void> updateGeofence(int index, Geofence geofence) async {
-    try {
-      geoFencesList[index] = geofence;
-      await saveGeoFencesToStorage();
-      Toast.showToast('Location "${geofence.title}" updated successfully!');
-    } catch (e) {
-      Toast.showToast('Failed to update!');
-    }
-  }
-
-  /// Removes a geofence at the specified index and persists the updated list.
-  Future<void> deleteGeofence(int index, Geofence geofence) async {
-    try {
-      geoFencesList[index] = geofence;
-      geoFencesList.removeAt(index);
-      await saveGeoFencesToStorage();
-      Toast.showToast('Location "${geofence.title}" deleted successfully!');
-    } catch (e) {
-      logger.e('Failed to delete geofence: $e');
     }
   }
 
@@ -173,21 +145,21 @@ class GeofenceController extends GetxController {
     try {
       bool isPermissionGranted = await _checkLocationPermission();
       if (!isPermissionGranted) {
-        logger.w('Location permission not granted');
+
         return;
       }
 
       _locationTimer?.cancel();
       _positionStream?.cancel();
 
-      _locationTimer = Timer.periodic(Duration(seconds: 60), (_) async {
+      _locationTimer = Timer.periodic(Duration(seconds: 30), (_) async {
         await updateLocation();
       });
 
       _positionStream = Geolocator.getPositionStream(
         locationSettings: LocationSettings(
           accuracy: LocationAccuracy.high,
-          distanceFilter: 20,
+          distanceFilter: 5,   /// 50 for optimized usage
         ),
       ).listen(
             (Position position) {
@@ -195,15 +167,13 @@ class GeofenceController extends GetxController {
           checkGeofences(position);
         },
         onError: (e) {
-          logger.e('Location stream error: $e');
           Toast.showToast('Location access denied or unavailable: $e');
         },
       );
 
       isTracking.value = true;
-      logger.i('Location tracking started');
+      logger.i('Tracking Started...........!');
     } catch (e) {
-      logger.e('Failed to start location tracking: $e');
       Toast.showToast('Failed to start location tracking: $e');
     }
   }
@@ -252,7 +222,6 @@ class GeofenceController extends GetxController {
       currentPosition.value = position;
       checkGeofences(position);
     } catch (e) {
-      logger.e('Failed to update location: $e');
       Toast.showToast('Failed to get location: $e');
     }
   }
@@ -329,7 +298,6 @@ class GeofenceController extends GetxController {
     try {
       locationHistory.add(entry);
       await saveLocationHistoryToStorage();
-      logger.i('History entry added: ${entry.status} for ${entry.title ?? "unknown"}');
     } catch (e) {
       logger.e('Failed to add history: $e');
     }
@@ -359,7 +327,7 @@ class GeofenceController extends GetxController {
   void onReady() {
     super.onReady();
     _permissionRecheckTimer?.cancel();
-    _permissionRecheckTimer = Timer(const Duration(seconds: 2), () {
+    _permissionRecheckTimer = Timer(const Duration(seconds: 3), () {
       requestPermissions();
     });
   }

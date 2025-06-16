@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:nectar_geofencing/helper/toaster.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../helper/logger.dart';
 import '../model/location_history.dart';
 import 'geo_fence_Controller.dart';
 
-class GeoFenceHistoryController extends GetxController {
+class MovementHistoryController extends GetxController {
 
   final Rx<LatLng> mapPosition = const LatLng(11.005064, 76.950846).obs;
 
@@ -52,7 +51,7 @@ class GeoFenceHistoryController extends GetxController {
       mapPosition.value = await _getInitialPosition();
       await _animateCameraToCoordinates([]);
     } catch (e) {
-      logger.e('Error initializing map position: $e');
+      logger.e('Error : $e');
     } finally {
       isMapLoading.value = false;
     }
@@ -82,13 +81,14 @@ class GeoFenceHistoryController extends GetxController {
 
       await _animateCameraToCoordinates(polyLines.values.expand((p) => p.points).toList());
     } catch (e) {
-      Toast.showToast('Error Loading Poly-lines');
+      logger.e('Error loading history poly-lines: $e');
     } finally {
       isPolylineLoading.value = false;
       update();
     }
   }
 
+  /// Determines the most appropriate initial position for the map
   Future<LatLng> _getInitialPosition() async {
     final position = geofenceController.currentPosition.value;
 
@@ -106,6 +106,7 @@ class GeoFenceHistoryController extends GetxController {
         : mapPosition.value;
   }
 
+  /// Groups location history entries by geofence title
   Map<String, List<LocationHistoryEntry>> _groupHistoryByGeofence(int limit) {
     final grouped = <String, List<LocationHistoryEntry>>{};
 
@@ -116,6 +117,7 @@ class GeoFenceHistoryController extends GetxController {
     return grouped;
   }
 
+  /// Retrieves route coordinates for a batch, utilizing cache or shared preferences if available
   Future<List<LatLng>> _getBatchRouteCoordinates(List<LocationHistoryEntry> batch, String geofenceTitle) async {
     if (batch.length < 2) return [];
 
@@ -141,6 +143,7 @@ class GeoFenceHistoryController extends GetxController {
     return coordinates;
   }
 
+  /// Adds markers to map for each point in the route
   void _addMarkers(List<LocationHistoryEntry> entries, String title, Color color) {
     for (var i = 0; i < entries.length; i++) {
       final entry = entries[i];
@@ -158,6 +161,7 @@ class GeoFenceHistoryController extends GetxController {
     }
   }
 
+  /// Adds a single polyline to the map
   void _addPolyline(List<LatLng> coordinates, String title, Color color) {
     final id = PolylineId('poly_$title');
     polyLines[id] = Polyline(
@@ -170,6 +174,7 @@ class GeoFenceHistoryController extends GetxController {
     );
   }
 
+  /// Moves the camera to show all coordinates in view
   Future<void> _animateCameraToCoordinates(List<LatLng> coordinates) async {
     final controller = googleMapController.value;
     if (controller == null || coordinates.isEmpty) return;
@@ -178,6 +183,7 @@ class GeoFenceHistoryController extends GetxController {
     await controller.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50));
   }
 
+  /// Calculates the bounding box for a list of coordinates
   LatLngBounds _calculateBounds(List<LatLng> coordinates) {
     double? minLat, maxLat, minLng, maxLng;
 

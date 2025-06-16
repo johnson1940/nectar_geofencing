@@ -4,7 +4,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get/get_navigation/src/routes/transitions_type.dart';
 import 'package:nectar_geofencing/view/home.dart';
-import 'package:nectar_geofencing/view/homeView.dart';
+import 'package:nectar_geofencing/view/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'globalWidgets/binding.dart';

@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nectar_geofencing/constants/color_constants.dart';
-import 'package:nectar_geofencing/controller/create_geo_fence_controller.dart';
-import 'package:nectar_geofencing/view/addGeofenceScreenView.dart';
-
+import 'package:nectar_geofencing/view/add_geo_fence.dart';
 import '../controller/nav_bar_controller.dart';
-import 'historyView.dart';
-import 'homeView.dart';
+import 'movement_history.dart';
+import 'home_screen.dart';
+
 
 class MainScreen extends StatelessWidget {
   final NavigationController navController = Get.put(NavigationController());
 
   final List<Widget> screens = [
     HomeScreen(),
-    Placeholder(), // Center '+' doesn't use this
-    HistoryScreen(),
+    Placeholder(), /// Center '+' doesn't use this
+    MovementHistoryScreen(),
   ];
+
+  MainScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:nectar_geofencing/constants/image_constants.dart';
+import 'package:nectar_geofencing/controller/add_geo_fence_controller.dart';
 import '../constants/color_constants.dart';
 import '../controller/geo_fence_Controller.dart';
 import '../globalWidgets/custom_text_field.dart';
 import '../model/geo_fence_model.dart';
-import 'addGeofenceScreenView.dart';
-import 'historyView.dart';
+import 'add_geo_fence.dart';
+import 'movement_history.dart';
 
 class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
 
   final GeofenceController geofenceController = Get.find<GeofenceController>();
+
+  final AddGeoFenceController addGeoFenceController = Get.find<AddGeoFenceController>();
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +56,7 @@ class HomeScreen extends StatelessWidget {
       actions: [
         IconButton(
           icon: Icon(Icons.history, size: 30, color: ColorConstants.secondaryColor),
-          onPressed: () => Get.to(() => HistoryScreen()),
+          onPressed: () => Get.to(() => MovementHistoryScreen()),
         ),
         SizedBox(width: screenSize.width * 0.02),
       ],
@@ -70,12 +72,11 @@ class HomeScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.location_off, color: ColorConstants.grey, size: 70,),
-            SizedBox(height: 10,),
+            SizedBox(height: 15,),
             CustomTextWidget(
               text: "Looks like you haven't added any locations yet. Try adding one!",
               fontSize: 16,
               textAlign: TextAlign.center,
-              fontWeight: FontWeight.bold,
               maxLines: 3,
             ),
           ],
@@ -174,8 +175,8 @@ class HomeScreen extends StatelessWidget {
                 _iconButton(
                   icon: Icons.delete,
                   tooltip: "Delete",
-                  color: Colors.red,
-                  onTap: () => geofenceController.deleteGeofence(index, geofence),
+                  color: ColorConstants.red,
+                  onTap: () => addGeoFenceController.deleteGeofence(index, geofence),
                 ),
               ],
             ),
