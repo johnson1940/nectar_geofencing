@@ -35,7 +35,7 @@ class CustomTextWidget extends StatelessWidget {
       style: TextStyle(
         fontSize: fontSize ??  13,
         decoration: isUnderText,
-        fontFamily: 'Roboto',
+        fontFamily: 'Poppins',
         decorationColor: color,
         fontWeight: fontWeight ?? FontWeight.normal,
         fontStyle: fontStyle ?? FontStyle.normal,

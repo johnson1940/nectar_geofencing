@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:nectar_geofencing/helper/toaster.dart';
 import '../constants/color_constants.dart';
 import '../controller/geo_fence_Controller.dart';
 import '../controller/geo_history_controller.dart';
@@ -8,7 +9,6 @@ import '../globalWidgets/custom_text_field.dart';
 import 'package:intl/intl.dart';
 
 class MovementHistoryScreen extends StatefulWidget {
-
   const MovementHistoryScreen({super.key});
 
   @override
@@ -17,14 +17,12 @@ class MovementHistoryScreen extends StatefulWidget {
 
 class _MovementHistoryScreenState extends State<MovementHistoryScreen> {
   final GeofenceController geofenceController = Get.find<GeofenceController>();
-
-  final MovementHistoryController geoFenceHistoryController = Get.find<MovementHistoryController>();
+  final MovementHistoryController movementHistoryController = Get.find<MovementHistoryController>();
 
   @override
   void initState() {
     super.initState();
-    // 🔔 Call your function here when screen opens
-    geoFenceHistoryController.renderHistoricalRoutes();  // Example
+    movementHistoryController.renderHistoricalRoutes();
   }
 
   @override
@@ -54,14 +52,14 @@ class _MovementHistoryScreenState extends State<MovementHistoryScreen> {
         myLocationEnabled: true,
         myLocationButtonEnabled: true,
         initialCameraPosition: CameraPosition(
-          target: geoFenceHistoryController.mapPosition.value,
+          target: movementHistoryController.initialMapPosition.value,
           zoom: 14,
         ),
         onMapCreated: (controller) {
-          geoFenceHistoryController.googleMapController.value = controller;
+          movementHistoryController.googleMapController.value = controller;
         },
-        polylines: geoFenceHistoryController.polyLines.values.toSet(),
-        markers: geoFenceHistoryController.markers.values.toSet(),
+        polylines: movementHistoryController.routePolylines.values.toSet(),
+        markers: movementHistoryController.markers.values.toSet(),
         circles: _buildGeofenceCircles(),
       );
     });
@@ -125,72 +123,84 @@ class _MovementHistoryScreenState extends State<MovementHistoryScreen> {
                       final formattedTime = DateFormat('hh:mm a').format(entry.timestamp);
                       final formattedDate = DateFormat('MMM dd, yyyy').format(entry.timestamp);
 
-                      return Card(
-                        color: Colors.white,
-                        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      entry.title ?? "Unknown Geofence",
-                                      style: TextStyle(
+                      return Dismissible(
+                        key: Key(entry.timestamp.toIso8601String()), // Unique key for each item
+                        direction: DismissDirection.endToStart, // Swipe right to left
+                        background: Container(
+                          alignment: Alignment.centerRight,
+                          padding: const EdgeInsets.only(right: 20),
+                          color: Colors.red,
+                          child: const Icon(Icons.delete, color: Colors.white),
+                        ),
+                        onDismissed: (_) {
+                          movementHistoryController.deleteHistory(entry);
+                          Toast.showToast('History deleted');
+                        },
+                        child: Card(
+                          color: Colors.white,
+                          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: CustomTextWidget(
+                                        text: entry.title ?? "Unknown Geofence",
                                         color: ColorConstants.primaryColor,
                                         fontWeight: FontWeight.bold,
                                         fontSize: 16,
                                       ),
                                     ),
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: entry.status.toLowerCase() == "entered"
-                                          ? Colors.green.withOpacity(0.1)
-                                          : Colors.red.withOpacity(0.1),
-                                      borderRadius: BorderRadius.circular(5),
-                                      border: Border.all(
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
                                         color: entry.status.toLowerCase() == "entered"
-                                            ? Colors.green
-                                            : Colors.red,
-                                        width: 1,
+                                            ? Colors.green.withOpacity(0.1)
+                                            : Colors.red.withOpacity(0.1),
+                                        borderRadius: BorderRadius.circular(5),
+                                        border: Border.all(
+                                          color: entry.status.toLowerCase() == "entered"
+                                              ? ColorConstants.green
+                                              : ColorConstants.red,
+                                          width: 1,
+                                        ),
                                       ),
-                                    ),
-                                    child: Text(
-                                      entry.status.toUpperCase(),
-                                      style: TextStyle(
+                                      child: CustomTextWidget(
+                                        text: entry.status.toUpperCase(),
                                         color: entry.status.toLowerCase() == "entered"
-                                            ? Colors.green
-                                            : Colors.red,
+                                            ? ColorConstants.green
+                                            : ColorConstants.red,
                                         fontWeight: FontWeight.bold,
                                         fontSize: 12,
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              // Date, Time
-                              Text(
-                                '$formattedDate | $formattedTime',
-                                style: TextStyle(color: Colors.grey[700], fontSize: 12),
-                              ),
-                              const SizedBox(height: 4),
-                              // Coordinates
-                              Text(
-                                'Lat: ${entry.latitude.toStringAsFixed(4)}, Long: ${entry.longitude.toStringAsFixed(4)}',
-                                style: TextStyle(color: Colors.grey[800], fontSize: 13),
-                              ),
-                            ],
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                CustomTextWidget(
+                                  text: '$formattedDate | $formattedTime',
+                                  color: Colors.grey[700],
+                                  fontSize: 12,
+                                ),
+                                const SizedBox(height: 4),
+                                CustomTextWidget(
+                                  text:
+                                  'Lat: ${entry.latitude.toStringAsFixed(4)}, Long: ${entry.longitude.toStringAsFixed(4)}',
+                                  color: Colors.grey[800],
+                                  fontSize: 13,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       );
+
                     },
                   );
                 }),

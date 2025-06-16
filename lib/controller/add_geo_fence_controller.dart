@@ -3,6 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:nectar_geofencing/helper/toaster.dart';
+import 'package:nectar_geofencing/model/location_history.dart';
 import '../helper/logger.dart';
 import '../model/geo_fence_model.dart';
 import 'geo_fence_Controller.dart';

@@ -12,7 +12,6 @@ class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
 
   final GeofenceController geofenceController = Get.find<GeofenceController>();
-
   final AddGeoFenceController addGeoFenceController = Get.find<AddGeoFenceController>();
 
   @override
@@ -21,9 +20,7 @@ class HomeScreen extends StatelessWidget {
 
     return GetBuilder<GeofenceController>(
       initState: (_) {
-        geofenceController.requestPermissions().then(
-              (_) => geofenceController.startLocationTracking(),
-        );
+        geofenceController.requestPermissions().then((_) => geofenceController.startLocationTracking());
       },
       builder: (controller) {
         return Scaffold(
@@ -31,9 +28,8 @@ class HomeScreen extends StatelessWidget {
           appBar: _buildAppBar(screenSize),
           body: Obx(() {
             if (controller.isLoading.value) {
-              return Center(child: CircularProgressIndicator());
+              return const Center(child: CircularProgressIndicator());
             }
-
             return controller.geoFencesList.isEmpty
                 ? _buildEmptyState(screenSize)
                 : _buildGeofenceList(controller, screenSize);
@@ -71,8 +67,8 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.location_off, color: ColorConstants.grey, size: 70,),
-            SizedBox(height: 15,),
+            Icon(Icons.location_off, color: ColorConstants.grey, size: 70),
+            const SizedBox(height: 15),
             CustomTextWidget(
               text: "Looks like you haven't added any locations yet. Try adding one!",
               fontSize: 16,
@@ -113,14 +109,11 @@ class HomeScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: Text(
-                    geofence.title,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: ColorConstants.primaryColor,
-                    ),
-                    overflow: TextOverflow.ellipsis,
+                  child: CustomTextWidget(
+                    text: geofence.title,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: ColorConstants.primaryColor,
                   ),
                 ),
                 Row(
@@ -134,13 +127,11 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 6),
-                    Text(
-                      geofence.isInside ? "Inside" : "Outside",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w500,
-                        fontSize: 12,
-                        color: geofence.isInside ? Colors.green : ColorConstants.grey,
-                      ),
+                    CustomTextWidget(
+                      text: geofence.isInside ? "Inside" : "Outside",
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: geofence.isInside ? Colors.green : ColorConstants.grey,
                     ),
                   ],
                 ),
@@ -186,6 +177,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  /// Row for Label & Value
   Widget _buildInfoRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
@@ -193,23 +185,19 @@ class HomeScreen extends StatelessWidget {
         children: [
           SizedBox(
             width: 70,
-            child: Text(
-              "$label:",
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 13,
-                color: ColorConstants.blackColor,
-              ),
+            child: CustomTextWidget(
+              text: "$label:",
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: ColorConstants.blackColor,
             ),
           ),
           const SizedBox(width: 6),
           Expanded(
-            child: Text(
-              value,
-              style: TextStyle(
-                fontSize: 13,
-                color: ColorConstants.blackColor,
-              ),
+            child: CustomTextWidget(
+              text: value,
+              fontSize: 13,
+              color: ColorConstants.blackColor,
             ),
           ),
         ],
@@ -217,6 +205,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  /// Circle Icon Buttons
   Widget _iconButton({
     required IconData icon,
     required String tooltip,

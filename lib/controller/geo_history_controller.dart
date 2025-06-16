@@ -8,88 +8,95 @@ import '../helper/logger.dart';
 import '../model/location_history.dart';
 import 'geo_fence_Controller.dart';
 
+/// Controller responsible for handling historical movement data,
+/// rendering polylines and markers on Google Maps, and managing the map's state.
 class MovementHistoryController extends GetxController {
+  /// Default initial position of the map (Coimbatore location here)
+  final Rx<LatLng> initialMapPosition = const LatLng(11.005064, 76.950846).obs;
 
-  final Rx<LatLng> mapPosition = const LatLng(11.005064, 76.950846).obs;
-
+  /// Google Maps controller instance
   final Rx<GoogleMapController?> googleMapController = Rxn<GoogleMapController>();
 
-  final RxBool isMapLoading = true.obs;
+  // Stores all polylines displayed on the map
+  final RxMap<PolylineId, Polyline> routePolylines = <PolylineId, Polyline>{}.obs;
 
-  final RxBool isPolylineLoading = true.obs;
-
-  final RxMap<PolylineId, Polyline> polyLines = <PolylineId, Polyline>{}.obs;
-
+  // Stores all markers displayed on the map
   final RxMap<MarkerId, Marker> markers = <MarkerId, Marker>{}.obs;
 
+  // Reference to GeofenceController to access current position & location history
   final GeofenceController geofenceController = Get.find<GeofenceController>();
 
+  // Stores colors assigned to each geofence for consistent visuals
   final Map<String, Color> geofenceColors = {};
 
+  // Default color used for polylines and markers
   final Color polylineColor = Colors.red;
 
-  final Map<String, List<LatLng>> _polylineCache = {};
+  // Cache for route coordinates to avoid recomputation or redundant reads
+  final Map<String, List<LatLng>> _routeCoordinateCache = {};
 
+  // SharedPreferences instance for caching route data locally
   SharedPreferences? _prefs;
 
+  /// Lifecycle method - Initializes preferences, determines map position, and renders routes.
   @override
   Future<void> onInit() async {
     super.onInit();
     _prefs = await SharedPreferences.getInstance();
-    await initializeMapPosition();
+    await _determineInitialMapPosition();
     await renderHistoricalRoutes();
   }
 
+  /// Lifecycle method - Disposes of map controller when no longer needed.
   @override
   void onClose() {
     googleMapController.value?.dispose();
     super.onClose();
   }
 
-  Future<void> initializeMapPosition() async {
+
+  /// Determines the initial camera position for the map.
+  /// Uses current position, last recorded location, or falls back to default.
+  Future<void> _determineInitialMapPosition() async {
     try {
-      mapPosition.value = await _getInitialPosition();
-      await _animateCameraToCoordinates([]);
+      initialMapPosition.value = await _getSuitableInitialPosition();
+      await _focusMapOnCoordinates([]);
     } catch (e) {
-      logger.e('Error : $e');
-    } finally {
-      isMapLoading.value = false;
+      logger.e('Error determining initial map position: $e');
     }
   }
 
-  Future<void> renderHistoricalRoutes({int limit = 100}) async {
-    isPolylineLoading.value = true;
-    polyLines.clear();
+  /// Clears existing polylines and markers, regenerates them from stored location history.
+  Future<void> renderHistoricalRoutes() async {
+    routePolylines.clear();
     markers.clear();
 
     try {
-      final groupedHistory = _groupHistoryByGeofence(limit);
+      final groupedHistory = _groupLocationHistory();
 
       groupedHistory.forEach((title, entries) async {
         final color = geofenceColors[title] = polylineColor;
-        for (var title in groupedHistory.keys) {
-          geofenceColors[title] = polylineColor; // or any color you prefer
-        }
 
-        _addMarkers(entries, title, color);
+        _addRouteMarkers(entries, title, color);
 
-        final coordinates = await _getBatchRouteCoordinates(entries, title);
+        final coordinates = await _getRouteCoordinates(entries, title);
         if (coordinates.isNotEmpty) {
-          _addPolyline(coordinates, title, color);
+          _addPolylineToMap(coordinates, title, color);
         }
       });
 
-      await _animateCameraToCoordinates(polyLines.values.expand((p) => p.points).toList());
+      await _focusMapOnCoordinates(routePolylines.values.expand((p) => p.points).toList());
     } catch (e) {
-      logger.e('Error loading history poly-lines: $e');
-    } finally {
-      isPolylineLoading.value = false;
-      update();
+      logger.e('Error loading history polylines: $e');
     }
+      update();
   }
 
-  /// Determines the most appropriate initial position for the map
-  Future<LatLng> _getInitialPosition() async {
+  /// Chooses the most relevant initial map position:
+  /// 1. Current GPS position if available.
+  /// 2. Last recorded location from history.
+  /// 3. Fallback to the hardcoded default position.
+  Future<LatLng> _getSuitableInitialPosition() async {
     final position = geofenceController.currentPosition.value;
 
     if (position != null) return LatLng(position.latitude, position.longitude);
@@ -103,39 +110,40 @@ class MovementHistoryController extends GetxController {
     final updatedPosition = geofenceController.currentPosition.value;
     return updatedPosition != null
         ? LatLng(updatedPosition.latitude, updatedPosition.longitude)
-        : mapPosition.value;
+        : initialMapPosition.value;
   }
 
-  /// Groups location history entries by geofence title
-  Map<String, List<LocationHistoryEntry>> _groupHistoryByGeofence(int limit) {
+  /// Groups the location history by geofence title for easier route rendering.
+  Map<String, List<LocationHistoryEntry>> _groupLocationHistory() {
     final grouped = <String, List<LocationHistoryEntry>>{};
 
-    for (var entry in geofenceController.locationHistory.take(limit)) {
+    for (var entry in geofenceController.locationHistory) {
       grouped.putIfAbsent(entry.title ?? 'Unknown_${entry.hashCode}', () => []).add(entry);
     }
 
     return grouped;
   }
 
-  /// Retrieves route coordinates for a batch, utilizing cache or shared preferences if available
-  Future<List<LatLng>> _getBatchRouteCoordinates(List<LocationHistoryEntry> batch, String geofenceTitle) async {
+  /// Retrieves coordinates for a batch of location history entries.
+  /// Utilizes in-memory and SharedPreferences caching for better performance.
+  Future<List<LatLng>> _getRouteCoordinates(List<LocationHistoryEntry> batch, String geofenceTitle) async {
     if (batch.length < 2) return [];
 
     final cacheKey = batch.map((e) => '${e.latitude},${e.longitude}').join('|');
-    if (_polylineCache.containsKey(cacheKey)) return _polylineCache[cacheKey]!;
+    if (_routeCoordinateCache.containsKey(cacheKey)) return _routeCoordinateCache[cacheKey]!;
 
     final cachedData = _prefs?.getString('polyline_$cacheKey');
     if (cachedData != null) {
       final cachedCoordinates = (jsonDecode(cachedData) as List<dynamic>)
           .map((e) => LatLng(e['latitude'], e['longitude']))
           .toList();
-      _polylineCache[cacheKey] = cachedCoordinates;
+      _routeCoordinateCache[cacheKey] = cachedCoordinates;
       return cachedCoordinates;
     }
 
     final coordinates = batch.map((e) => LatLng(e.latitude, e.longitude)).toList();
 
-    _polylineCache[cacheKey] = coordinates;
+    _routeCoordinateCache[cacheKey] = coordinates;
     await _prefs?.setString('polyline_$cacheKey', jsonEncode(coordinates
         .map((c) => {'latitude': c.latitude, 'longitude': c.longitude})
         .toList()));
@@ -143,8 +151,8 @@ class MovementHistoryController extends GetxController {
     return coordinates;
   }
 
-  /// Adds markers to map for each point in the route
-  void _addMarkers(List<LocationHistoryEntry> entries, String title, Color color) {
+  /// Adds a series of markers to the map for the provided route entries.
+  void _addRouteMarkers(List<LocationHistoryEntry> entries, String title, Color color) {
     for (var i = 0; i < entries.length; i++) {
       final entry = entries[i];
       final markerId = MarkerId('marker_${title}_$i');
@@ -161,10 +169,10 @@ class MovementHistoryController extends GetxController {
     }
   }
 
-  /// Adds a single polyline to the map
-  void _addPolyline(List<LatLng> coordinates, String title, Color color) {
+  /// Adds a polyline to the map for visualizing the path between points.
+  void _addPolylineToMap(List<LatLng> coordinates, String title, Color color) {
     final id = PolylineId('poly_$title');
-    polyLines[id] = Polyline(
+    routePolylines[id] = Polyline(
       polylineId: id,
       color: color,
       points: coordinates,
@@ -174,17 +182,17 @@ class MovementHistoryController extends GetxController {
     );
   }
 
-  /// Moves the camera to show all coordinates in view
-  Future<void> _animateCameraToCoordinates(List<LatLng> coordinates) async {
+  /// Adjusts the map's camera view to fit all provided coordinates into the viewport.
+  Future<void> _focusMapOnCoordinates(List<LatLng> coordinates) async {
     final controller = googleMapController.value;
     if (controller == null || coordinates.isEmpty) return;
 
-    final bounds = _calculateBounds(coordinates);
+    final bounds = _calculateCoordinateBounds(coordinates);
     await controller.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50));
   }
 
-  /// Calculates the bounding box for a list of coordinates
-  LatLngBounds _calculateBounds(List<LatLng> coordinates) {
+  /// Calculates the bounding box (LatLngBounds) to cover all specified coordinates.
+  LatLngBounds _calculateCoordinateBounds(List<LatLng> coordinates) {
     double? minLat, maxLat, minLng, maxLng;
 
     for (var point in coordinates) {
@@ -198,5 +206,9 @@ class MovementHistoryController extends GetxController {
       southwest: LatLng(minLat!, minLng!),
       northeast: LatLng(maxLat!, maxLng!),
     );
+  }
+
+  void deleteHistory(LocationHistoryEntry entry) {
+    geofenceController.locationHistory.remove(entry);
   }
 }

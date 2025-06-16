@@ -31,7 +31,6 @@ class AddGeofenceScreen extends StatelessWidget {
           body: _buildBody(screenSize, controller),
           bottomNavigationBar: _buildSubmitButton(screenSize, controller),
         );
-
       },
     );
   }
@@ -62,7 +61,7 @@ class AddGeofenceScreen extends StatelessWidget {
           ),
           SizedBox(width: screenSize.width * 0.04),
           CustomTextWidget(
-            text: geofence == null ? 'Add Geofence' : 'Edit Geofence',
+            text: geofence == null ? 'Add Geofence' : 'Update Geofence',
             fontSize: 20,
             fontWeight: FontWeight.w700,
           ),
@@ -90,12 +89,10 @@ class AddGeofenceScreen extends StatelessWidget {
               _buildMap(screenSize, controller),
             ],
           ),
-
         ),
       ),
     );
   }
-
 
   Widget _buildTitleInput(AddGeoFenceController controller) {
     return TextFormField(
@@ -104,6 +101,7 @@ class AddGeofenceScreen extends StatelessWidget {
       style: TextStyle(
         color: ColorConstants.blackColor,
         fontSize: 12,
+        fontFamily: 'Poppins'
       ),
       decoration: _buildInputDecoration('Title'),
       validator: (value) => value == null || value.isEmpty ? 'Please enter a title' : null,
@@ -174,6 +172,7 @@ class AddGeofenceScreen extends StatelessWidget {
       style: TextStyle(
         color: ColorConstants.blackColor,
         fontSize: 12,
+          fontFamily: 'Poppins'
       ),
       decoration: _buildInputDecoration('Enter the radius (meters)'),
       validator: (value) {
@@ -192,8 +191,8 @@ class AddGeofenceScreen extends StatelessWidget {
           width: screenSize.width,
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: ColorConstants.primaryColor,  // Button background color
-              foregroundColor: ColorConstants.secondaryColor, // Text/Icon color
+              backgroundColor: ColorConstants.primaryColor,
+              foregroundColor: ColorConstants.secondaryColor,
               padding: EdgeInsets.symmetric(vertical: screenSize.height * 0.015),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -220,12 +219,10 @@ class AddGeofenceScreen extends StatelessWidget {
                 Get.snackbar('Error', 'Please select a location on the map');
               }
             },
-            child: Text(
-              geofence == null ? 'Create' : 'Update',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+            child: CustomTextWidget(
+              text: geofence == null ? 'Create' : 'Update',
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ),
@@ -233,12 +230,12 @@ class AddGeofenceScreen extends StatelessWidget {
     );
   }
 
-
   InputDecoration _buildInputDecoration(String label) {
     return InputDecoration(
       labelText: label,
       labelStyle: TextStyle(
-        color: ColorConstants.blackColor,
+          color: ColorConstants.blackColor,
+          fontFamily: 'Poppins'
       ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(7.0),
