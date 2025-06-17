@@ -186,7 +186,8 @@ lib/
     * Testing has been focused on Android devices.
  
 ## SHOWCASE
-![PHOTO-2025-06-16-22-33-48](https://github.com/user-attachments/assets/cce78429-5f6d-4537-bba9-477772e83933)
+![locatr](https://github.com/user-attachments/assets/d2cdeaa5-b656-428d-9187-8b9d544c42e7)
+
 
 
 
