@@ -5,6 +5,8 @@ import '../controller/geo_history_controller.dart';
 
 class GlobalBinding extends Bindings {
 
+  /// Controller registration
+
   @override
   void dependencies() {
     Get.lazyPut(()=>GeofenceController(),fenix:true);

@@ -45,7 +45,6 @@ The **Geofence Tracker App** is a user-friendly mobile application that allows u
 |                              | `fluttertoast`                | Toast messages                  |
 |                              | `flutter_native_splash`       | Custom splash screen            |
 | **State Management**         | `get`                         | Routing & state management      |
-|                              | `rxdart`                      | Advanced reactive programming   |
 | **Utilities**                | `logger`                      | Debugging and logs              |
 |                              | `shared_preferences`          | Persistent local storage        |
 |                              | `intl`                        | Date formatting                 |

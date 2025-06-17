@@ -3,12 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:get/get_navigation/src/routes/transitions_type.dart';
+import 'package:nectar_geofencing/constants/color_constants.dart';
 import 'package:nectar_geofencing/view/home.dart';
-import 'package:nectar_geofencing/view/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'globalWidgets/binding.dart';
-import 'helper/logger.dart';
+
 
 
 void main() async {
@@ -30,13 +29,7 @@ void main() async {
   await SharedPreferences.getInstance();
 
   /// Initialize notifications
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-  FlutterLocalNotificationsPlugin();
-  const AndroidInitializationSettings initializationSettingsAndroid =
-  AndroidInitializationSettings('@mipmap/ic_launcher'); // Use launcher icon
-  const InitializationSettings initializationSettings =
-  InitializationSettings(android: initializationSettingsAndroid);
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  initializeNotifications();
 
   runApp(const MyApp());
 }
@@ -59,7 +52,7 @@ class MyApp extends StatelessWidget {
             darkTheme: ThemeData.dark(),
             initialRoute: '/',
             theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+              colorScheme: ColorScheme.fromSeed(seedColor: ColorConstants.primaryColor),
               useMaterial3: true,
               visualDensity: VisualDensity.adaptivePlatformDensity,
             ),
@@ -75,15 +68,11 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key,});
 
-
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-
 class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
-
-
   @override
   Widget build(BuildContext context) {
     return MainScreen();
@@ -102,4 +91,14 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 }
 
-
+/// Notification Initialization function
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+FlutterLocalNotificationsPlugin();
+Future<void> initializeNotifications() async {
+  const AndroidInitializationSettings initializationSettingsAndroid =
+  AndroidInitializationSettings('@mipmap/ic_launcher'); // Default app icon
+  const InitializationSettings initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
+  );
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+}
