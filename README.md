@@ -185,8 +185,12 @@ lib/
 
     * Testing has been focused on Android devices.
  
-## SHOWCASE
+## Showcase
 ![locatr](https://github.com/user-attachments/assets/d2cdeaa5-b656-428d-9187-8b9d544c42e7)
+
+## Outcome
+
+https://github.com/user-attachments/assets/62d7b926-890a-4211-b23a-2f7a91633dcd
 
 
 
