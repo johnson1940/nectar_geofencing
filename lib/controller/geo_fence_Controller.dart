@@ -34,7 +34,7 @@ class GeofenceController extends GetxController {
 
   StreamSubscription<Position>? _positionStream; // Stream to listen to live location
 
-  Timer? _permissionRecheckTimer; // Timer to recheck permissions
+  Timer? _recheckPermissionsTimer; // Timer to recheck permissions
 
   late final NotificationService notificationService; // For triggering notifications
 
@@ -210,7 +210,6 @@ class GeofenceController extends GetxController {
 
       return false;
     } catch (e) {
-      logger.e("Permission check error: $e");
       return false;
     }
   }
@@ -326,8 +325,9 @@ class GeofenceController extends GetxController {
   @override
   void onReady() {
     super.onReady();
-    _permissionRecheckTimer?.cancel();
-    _permissionRecheckTimer = Timer(const Duration(seconds: 3), () {
+    _recheckPermissionsTimer?.cancel();
+    /// Request permission after 3 seconds
+    _recheckPermissionsTimer = Timer(const Duration(seconds: 3), () {
       requestPermissions();
     });
   }
@@ -338,7 +338,7 @@ class GeofenceController extends GetxController {
   void onClose() {
     _locationTimer?.cancel();
     _positionStream?.cancel();
-    _permissionRecheckTimer?.cancel();
+    _recheckPermissionsTimer?.cancel();
     logger.i('GeofenceController closed');
     super.onClose();
   }

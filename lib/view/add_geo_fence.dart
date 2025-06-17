@@ -170,8 +170,8 @@ class AddGeofenceScreen extends StatelessWidget {
       keyboardType: TextInputType.number,
       cursorColor: ColorConstants.primaryColor,
       style: TextStyle(
-        color: ColorConstants.blackColor,
-        fontSize: 12,
+          color: ColorConstants.blackColor,
+          fontSize: 12,
           fontFamily: 'Poppins'
       ),
       decoration: _buildInputDecoration('Enter the radius (meters)'),
@@ -211,7 +211,7 @@ class AddGeofenceScreen extends StatelessWidget {
                 if (geofence == null) {
                   addGeoFenceController.saveNewGeofence(newGeofence);
                 } else {
-                  addGeoFenceController.updateGeofence(index!, newGeofence);
+                  addGeoFenceController.updateGeofence(index ?? 0, newGeofence);
                 }
 
                 Get.back();

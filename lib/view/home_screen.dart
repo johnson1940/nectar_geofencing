@@ -96,9 +96,15 @@ class HomeScreen extends StatelessWidget {
   /// Card for each Geofence item
   Widget _buildGeofenceCard(Geofence geofence, int index) {
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 10),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      color: Colors.white,
+      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(
+          color: ColorConstants.grey,  // Border color
+          width: 0.2,            // Border width
+        ),
+      ),
+      color: ColorConstants.secondaryColor,
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(

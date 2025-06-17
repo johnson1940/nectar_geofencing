@@ -50,7 +50,6 @@ class NotificationService {
         final androidPlugin = flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
         await androidPlugin?.createNotificationChannel(backgroundChannel);
         await androidPlugin?.createNotificationChannel(geofenceChannel);
-       // logger.i('Notification channels created');
       }
     } catch (e) {
       Toast.showToast('Notifications may not work. Please check permissions.');
@@ -131,8 +130,7 @@ class NotificationService {
 
   @pragma('vm:entry-point')
   static bool onIosBackground(ServiceInstance service) {
-    logger.i('iOS background service running');
-    Timer(Duration(seconds: 60), () async {
+    Timer(Duration(seconds: 30), () async {
       try {
         Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
         final prefs = await SharedPreferences.getInstance();
@@ -140,7 +138,7 @@ class NotificationService {
         final List<Geofence> geofences = (jsonDecode(geofenceList) as List).map((json) => Geofence.fromJson(json)).toList();
         await _checkGeofencesInBackground(position, geofences);
       } catch (e) {
-
+        logger.i('Unable to track');
       }
     });
     return true;

@@ -53,7 +53,7 @@ class _MovementHistoryScreenState extends State<MovementHistoryScreen> {
         myLocationButtonEnabled: true,
         initialCameraPosition: CameraPosition(
           target: movementHistoryController.initialMapPosition.value,
-          zoom: 14,
+          zoom: 16,
         ),
         onMapCreated: (controller) {
           movementHistoryController.googleMapController.value = controller;
@@ -108,9 +108,7 @@ class _MovementHistoryScreenState extends State<MovementHistoryScreen> {
                     return Center(
                       child: CustomTextWidget(
                         text: "Looks like there's nothing here yet",
-                        color: ColorConstants.primaryColor,
                         fontSize: 16,
-                        fontWeight: FontWeight.bold,
                       ),
                     );
                   }
@@ -139,7 +137,13 @@ class _MovementHistoryScreenState extends State<MovementHistoryScreen> {
                         child: Card(
                           color: Colors.white,
                           margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              side: BorderSide(
+                                color: ColorConstants.grey,  // Border color
+                                 width: 0.2,            // Border width
+                            ),
+                          ),
                           child: Padding(
                             padding: const EdgeInsets.all(12),
                             child: Column(
@@ -200,7 +204,6 @@ class _MovementHistoryScreenState extends State<MovementHistoryScreen> {
                           ),
                         ),
                       );
-
                     },
                   );
                 }),

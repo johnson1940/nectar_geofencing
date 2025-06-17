@@ -3,7 +3,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:nectar_geofencing/helper/toaster.dart';
-import 'package:nectar_geofencing/model/location_history.dart';
 import '../helper/logger.dart';
 import '../model/geo_fence_model.dart';
 import 'geo_fence_Controller.dart';
@@ -28,7 +27,7 @@ class AddGeoFenceController extends GetxController {
     try {
       geofenceController.geoFencesList.add(geofence);
       await geofenceController.saveGeoFencesToStorage();
-      Toast.showToast('Successfully added "${geofence.title}"!');
+      Toast.showToast('Successfully added ${geofence.title}');
     } catch (e) {
       Toast.showToast('Failed to store!');
     }
@@ -39,7 +38,7 @@ class AddGeoFenceController extends GetxController {
     try {
       geofenceController.geoFencesList[index] = geofence;
       await geofenceController.saveGeoFencesToStorage();
-      Toast.showToast('Location "${geofence.title}" updated successfully!');
+      Toast.showToast('Location ${geofence.title} updated successfully!');
     } catch (e) {
       Toast.showToast('Failed to update!');
     }
@@ -51,13 +50,14 @@ class AddGeoFenceController extends GetxController {
       geofenceController.geoFencesList[index] = geofence;
       geofenceController.geoFencesList.removeAt(index);
       await geofenceController.saveGeoFencesToStorage();
-      Toast.showToast('Location "${geofence.title}" deleted successfully!');
+      Toast.showToast('Location ${geofence.title} deleted successfully!');
     } catch (e) {
       logger.e('Failed to delete geofence: $e');
     }
   }
 
 
+  /// Getting the initial position
   Future<void> getInitialPosition() async {
     try {
       final position = await Geolocator.getCurrentPosition(

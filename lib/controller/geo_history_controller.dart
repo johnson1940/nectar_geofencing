@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:nectar_geofencing/constants/color_constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../helper/logger.dart';
@@ -32,7 +33,7 @@ class MovementHistoryController extends GetxController {
   // Default color used for polylines and markers
   final Color polylineColor = Colors.red;
 
-  // Cache for route coordinates to avoid recomputation or redundant reads
+  // Cache for route coordinates to avoid re-computation or redundant reads
   final Map<String, List<LatLng>> _routeCoordinateCache = {};
 
   // SharedPreferences instance for caching route data locally
@@ -174,9 +175,9 @@ class MovementHistoryController extends GetxController {
     final id = PolylineId('poly_$title');
     routePolylines[id] = Polyline(
       polylineId: id,
-      color: color,
+      color: ColorConstants.blue,
       points: coordinates,
-      width: 10,
+      width: 5,
       visible: true,
       geodesic: true,
     );
