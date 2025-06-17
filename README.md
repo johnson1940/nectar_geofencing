@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/116df031-6448-45af-8095-eedc904807f4)# 🛡️ Geofence Tracker App (Nectar Mobile Assignment - #GTA)
+# 🛡️ Geofence Tracker App (Nectar Mobile Assignment - #GTA)
 
 The **Geofence Tracker App** is a user-friendly mobile application that allows users to define geofences, track their location in real-time (including background tracking), and receive notifications upon entering or exiting geofenced areas.
 
